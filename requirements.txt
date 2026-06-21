@@ -1,0 +1,13 @@
+# 纸质问卷识别系统依赖
+# Python 3.13 环境。安装：pip install -r requirements.txt
+
+# ---- 核心识别 ----
+PyYAML>=6.0        # 读写 config.yaml / scales.yaml / wjx_mapping.yaml
+PyMuPDF>=1.24      # PDF 拆页 (import fitz)
+Pillow>=10.0       # 图像处理/裁剪
+numpy>=1.26        # 预处理(黑边列检测/投影)
+openai>=1.0        # 视觉大模型调用(OpenAI 兼容接口，如通义千问 qwen-vl-max)
+
+# ---- 问卷星批量导入(浏览器自动化) ----
+playwright>=1.40   # 自动填写+提交问卷星(用系统 Edge，免下载 chromium)
+# 安装后无需 `playwright install chromium`，代码用 channel="msedge" 驱动 Win11 自带 Edge

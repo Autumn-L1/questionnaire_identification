@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>问卷识别结果核对</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Microsoft YaHei", sans-serif; font-size: 13px; color: #222; }
+  #bar { padding: 6px 10px; background: #f5f6f8; border-bottom: 1px solid #ccd;
+         display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  #bar select, #bar button { padding: 5px 10px; border: 1px solid #bbc; border-radius: 4px; background: #fff; cursor: pointer; }
+  #bar button.primary { background: #2a6; color: #fff; border-color: #195; }
+  #bar .nav button { min-width: 40px; font-size: 15px; }
+  #bar .pg { font-weight: bold; min-width: 78px; text-align: center; }
+  #status { color: #2a6; }
+  .hint { color: #999; font-size: 11px; margin-left: auto; }
+  #main { display: flex; height: calc(100vh - 76px); }
+  #left { flex: 1.1; min-width: 380px; background: #2b2b2b; overflow: hidden;
+          display: flex; align-items: center; justify-content: center; padding: 8px; }
+  #logside { width: 290px; flex-shrink: 0; border-left: 1px solid #ccd; background: #fafbfc;
+             display: flex; flex-direction: column; overflow: hidden; }
+  #logside.hidden { display: none; }
+  #logside .lh { padding: 6px 10px; background: #eef2f7; border-bottom: 1px solid #dde;
+                 font-size: 12.5px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  #logside .lh button { font-size: 11px; padding: 1px 6px; }
+  #loglist { overflow: auto; flex: 1; padding: 4px 0; }
+  .iss { padding: 5px 10px; border-bottom: 1px solid #f0f2f5; font-size: 11.5px; }
+  .iss .tag { display: inline-block; padding: 0 5px; border-radius: 3px; color: #fff; font-size: 10px; margin-right: 4px; }
+  .iss.ERROR { background: #fff5f5; }
+  .iss.ERROR .tag { background: #d33; }
+  .iss.WARN { background: #fffbf0; }
+  .iss.WARN .tag { background: #e90; }
+  .iss.INFO .tag { background: #2a6; }
+  .iss .meta { color: #789; font-size: 10.5px; }
+  .iss .msg { color: #345; word-break: break-all; }
+  .iss.resolved { background: #eaf6ee !important; opacity: 0.75; }
+  .iss.resolved .tag { background: #2a6 !important; }
+  .issbtns { margin-top: 3px; display: flex; gap: 4px; }
+  .issbtns button { font-size: 10.5px; padding: 1px 6px; border: 1px solid #bbc; border-radius: 3px; background: #fff; cursor: pointer; }
+  #left img { max-width: 100%; max-height: 100%; width: auto; height: auto; box-shadow: 0 0 8px #000; }
+  #right { flex: 1; min-width: 360px; overflow: auto; padding: 8px; border-left: 1px solid #ccd; background: #fff; }
+  .grp { margin-bottom: 8px; border: 1px solid #e2e5ea; border-radius: 5px; overflow: hidden; }
+  .grp > h3 { margin: 0; padding: 4px 10px; background: #eef2f7; font-size: 12.5px; }
+  .cell { display: flex; align-items: center; padding: 2px 10px; border-top: 1px solid #f0f2f5; gap: 6px; }
+  .cell label { width: 78px; color: #789; font-size: 11px; flex-shrink: 0; font-family: monospace; }
+  .cell input { padding: 2px 4px; border: 1px solid #e5e8ec; border-radius: 3px; font-size: 12.5px; }
+  .cell input.wide { flex: 1; }
+  .cell input.num { width: 46px; text-align: center; }
+  .cell input.dirty { background: #fff8e1; border-color: #f0ad4e; }
+  .cell input.empty { color: #c33; font-style: italic; }
+  .opts { display: flex; gap: 2px; flex: 1; flex-wrap: wrap; }
+  .opts span { display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; border: 1px solid #ccd; border-radius: 10px;
+    font-size: 11px; color: #456; cursor: pointer; padding: 0 5px; background: #fff; }
+  .opts span:hover { border-color: #2a6; }
+  .opts span.on { background: #2a6; color: #fff; border-color: #195; font-weight: bold; }
+  .dimrow { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #789; }
+  .dimrow .dk { width: 34px; flex-shrink: 0; }
+  .cell input:focus { outline: none; border-color: #2a6; }
+  .cell input.dirty { background: #fff8e1; border-color: #f0ad4e; }
+  .cell input.empty { color: #c33; font-style: italic; }
+  .empty-page { color: #999; text-align: center; padding: 40px; }
+  kbd { background: #eee; border: 1px solid #ccc; border-radius: 3px; padding: 0 4px; font-size: 11px; }
+</style>
+</head>
+<body>
+<div style="display:flex;background:#357">
+  <a href="/" style="color:#fff;padding:7px 16px;text-decoration:none">📄 核对</a>
+  <a href="/wjx" style="color:#fff;padding:7px 16px;text-decoration:none">📋 问卷星导入</a>
+  <a href="/increment" style="color:#fff;padding:7px 16px;text-decoration:none">🔍 增量扫描</a>
+</div>
+<div id="bar">
+  <span>样本</span>
+  <button class="nav" onclick="changeSample(-1)" title="上一个样本 (←)">◀</button>
+  <select id="sample"></select>
+  <button class="nav" onclick="changeSample(1)" title="下一个样本 (→)">▶</button>
+  <span style="width:14px"></span>
+  <button class="nav" onclick="changePage(-1)" title="上一页 (↑)">▲</button>
+  <span class="pg" id="pglabel">源页 1/20</span>
+  <button class="nav" onclick="changePage(1)" title="下一页 (↓)">▼</button>
+  <span style="width:14px"></span>
+  <button class="primary" onclick="save()">💾 保存修改</button>
+  <button onclick="reload()">↻ 重载</button>
+  <button id="backupBtn" onclick="doBackup()" style="background:#357;border-color:#246">💾 备份</button>
+  <select id="backupList" onchange="loadBackupList()" style="max-width:160px"></select>
+  <button onclick="doRestore()" style="background:#a53;border-color:#942">↩ 恢复</button>
+  <button id="resetPageBtn" onclick="toggleResetPage()" title="切换样本时是否回到第一页">↻切样本回首页:开</button>
+  <button id="checkbtn" onclick="toggleCheck()" title="标记当前样本已核对/未核对">○ 标记已核对</button>
+  <button id="logbtn" onclick="toggleLog()">📋 日志</button>
+  <span id="status"></span>
+  <span class="hint"><kbd>←→</kbd>切样本 <kbd>↑↓</kbd>翻页 · 改动标黄 · 空值标红</span>
+</div>
+<div id="main">
+  <div id="left"><img id="img" alt="源页图片"></div>
+  <div id="right"></div>
+  <div id="logside" class="hidden">
+    <div class="lh"><span>📋 错误日志 <span id="logcnt" style="color:#789;font-weight:normal"></span></span>
+      <button onclick="toggleLog()">收起 ✕</button></div>
+    <div id="loglist"></div>
+  </div>
+</div>
+<script>
+let DATA = null;
+let changes = {};        // {rowIdx: {col: newVal}}
+let curSample = 0, curPage = 1;
+let shownLastHint = false;   // 本样本是否已提示过末页核对(切样本时重置)
+let resetPageOnSample = true; // 切换样本时是否回到第一页
+const TOTAL_PAGES = 20;
+
+async function load() {
+  DATA = await (await fetch('/api/data')).json();
+  renderSampleSelect();
+  render(); loadImg();
+  loadIssues();
+}
+function isChecked(i) { return !!(DATA.checked && DATA.checked[String(i)]); }
+function renderSampleSelect() {
+  const s = document.getElementById('sample');
+  s.innerHTML = DATA.samples.map(x => {
+    const mark = isChecked(x.idx) ? ' ✓' : ' ○';
+    return `<option value="${x.idx}">${x.subject_id || ('样本' + (x.idx + 1))}${mark} — ${x.name.slice(-14)}</option>`;
+  }).join('');
+  s.onchange = () => { curSample = +s.value; if (resetPageOnSample) curPage = 1; shownLastHint = false; render(); loadImg(); };
+  s.value = curSample;
+}
+async function toggleCheck(forceVal) {
+  const nv = (forceVal === undefined) ? !isChecked(curSample) : forceVal;
+  if (DATA.checked === undefined) DATA.checked = {};
+  DATA.checked[String(curSample)] = nv;
+  const r = await fetch('/api/check', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ idx: curSample, checked: nv }) });
+  const d = await r.json();
+  DATA.checked = d.checked;
+  renderSampleSelect();
+  updateCheckBtn();
+}
+function updateCheckBtn() {
+  const b = document.getElementById('checkbtn');
+  const chk = isChecked(curSample);
+  b.textContent = chk ? '✓ 已核对' : '○ 标记已核对';
+  b.style.background = chk ? '#2a6' : '#fff';
+  b.style.color = chk ? '#fff' : '#357';
+}
+function toggleLog() {
+  const ls = document.getElementById('logside');
+  ls.classList.toggle('hidden');
+  if (!ls.classList.contains('hidden')) loadIssues();
+}
+async function loadIssues() {
+  let issues = [];
+  try { issues = await (await fetch('/api/issues')).json(); } catch (e) { return; }
+  const errs = issues.filter(x => (x.severity || '').toUpperCase() === 'ERROR' && !x.resolved);
+  const warns = issues.filter(x => (x.severity || '').toUpperCase() === 'WARN' && !x.resolved);
+  document.getElementById('logcnt').textContent =
+    `(${errs.length}错误 / ${warns.length}警告 / ${issues.filter(x=>x.resolved).length}已解决)`;
+  // 未解决在上、已解决(绿)在下
+  const open = issues.filter(x => !x.resolved);
+  const done = issues.filter(x => x.resolved);
+  const render = x => {
+    const sev = (x.severity || '?').toUpperCase();
+    return `<div class="iss ${sev} ${x.resolved ? 'resolved' : ''}">
+      <span class="tag">${sev}</span>
+      <span class="meta">[${esc(x.subject_id || '')}] ${esc(x.code || '')} · ${esc(x.scope || '')}</span>
+      <div class="msg">${esc(x.msg || '')}</div>
+      <div class="issbtns">
+        <button onclick="jumpIssue(${issueSampleIdx(x)},${issuePage(x)})">📍跳转</button>
+        <button onclick="toggleResolve('${esc(x._key)}',${!x.resolved})">${x.resolved ? '↩未解决' : '✓已解决'}</button>
+      </div>
+    </div>`;
+  };
+  let html = open.map(render).join('');
+  if (done.length) html += `<div class="iss" style="background:#eef;border:none;color:#789;font-size:11px">— 已解决 (${done.length}) —</div>` + done.map(render).join('');
+  document.getElementById('loglist').innerHTML = html || '<div class="iss" style="color:#999">无日志问题 ✅</div>';
+}
+function issueSampleIdx(x) {
+  const sid = String(x.subject_id || '');
+  const s = DATA.samples.find(t => t.subject_id === sid || t.name.includes(sid));
+  return s ? s.idx : curSample;
+}
+function issuePage(x) {
+  const sc = x.scope || '';
+  let m = sc.match(/page(\d+)/); if (m) return +m[1];
+  m = sc.match(/scale:(S\w+)/); if (m) {
+    const g = DATA.groups.find(t => t.label.startsWith(m[1] + ' '));
+    if (g) return g.page;
+  }
+  return 1;
+}
+function jumpIssue(si, pg) {
+  curSample = si; curPage = pg; shownLastHint = false;
+  render(); loadImg();
+}
+async function toggleResolve(key, val) {
+  await fetch('/api/resolve', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ key, resolved: val }) });
+  loadIssues();
+}
+function loadImg() {
+  document.getElementById('img').src = `/api/img?sample=${curSample}&page=${curPage}&_=${Date.now()}`;
+}
+function render() {
+  document.getElementById('sample').value = curSample;
+  document.getElementById('pglabel').textContent = `源页 ${curPage}/${TOTAL_PAGES}`;
+  renderSampleSelect();
+  updateCheckBtn();
+  // 翻到最后一页且未核对时，自动标记为已核对(每样本仅触发一次)
+  if (curPage === TOTAL_PAGES && !isChecked(curSample) && !shownLastHint) {
+    shownLastHint = true;
+    toggleCheck(true);
+    document.getElementById('status').textContent = `样本 ${curSample + 1} 已浏览完末页，自动标记为已核对 ✓`;
+  }
+  const row = DATA.rows[curSample] || [];
+  const orig = {}; DATA.columns.forEach((c, i) => orig[c] = row[i] ?? '');
+  // 只显示当前页对应的分组
+  const pageGroups = DATA.groups.filter(g => g.page === curPage);
+  const right = document.getElementById('right');
+  if (!pageGroups.length) {
+    right.innerHTML = `<div class="empty-page">源页 ${curPage} 无对应题目<br>(该页可能为说明页或留白)</div>`;
+    loadImg(); return;
+  }
+  right.innerHTML = pageGroups.map(g => {
+    const cells = g.cols.map(c => renderCell(g, c, orig)).join('');
+    return `<div class="grp"><h3>${esc(g.label)}</h3>${cells}</div>`;
+  }).join('');
+  // 数值输入框联动
+  right.querySelectorAll('input[data-col]').forEach(inp => {
+    inp.oninput = () => {
+      if (inp.dataset.dim) { syncDim(inp, orig); return; }       // 双维度
+      setVal(inp.dataset.col, inp.value, orig, inp);
+      inp.closest('.cell').querySelectorAll('.opts span').forEach(sp => {
+        sp.classList.toggle('on', sp.dataset.v === String(inp.value).trim());
+      });
+    };
+  });
+  // 选项条点击 → 设置数值(双维度则改对应维度)
+  right.querySelectorAll('.opts span').forEach(sp => {
+    sp.onclick = () => {
+      const cell = sp.closest('.cell'), inp = cell.querySelector('input[data-col]');
+      const cur = String(inp.value).trim();
+      if (inp.dataset.dim) {
+        inp.value = sp.dataset.v === cur ? '' : sp.dataset.v;
+        syncDim(inp, orig);
+      } else {
+        const nv = sp.dataset.v === cur ? '' : sp.dataset.v;
+        inp.value = nv; setVal(inp.dataset.col, nv, orig, inp);
+      }
+      cell.querySelectorAll('.opts span').forEach(x => x.classList.toggle('on', x.dataset.v === String(inp.value).trim()));
+    };
+  });
+  loadImg();
+}
+// 设置单值列的改动追踪
+function setVal(col, val, orig, inpEl) {
+  val = (val ?? '').toString();
+  if (val === String(orig[col] ?? '')) {
+    if (changes[curSample]) delete changes[curSample][col];
+    if (inpEl) inpEl.classList.remove('dirty');
+  } else {
+    changes[curSample] = changes[curSample] || {};
+    changes[curSample][col] = val;
+    if (inpEl) inpEl.classList.add('dirty');
+  }
+}
+// 选项条数字序列
+function optNums(opt) {
+  if (!opt) return [];
+  let [lo, hi] = opt; lo = +lo; hi = +hi;
+  if (hi < lo) [lo, hi] = [hi, lo];
+  return Array.from({length: hi - lo + 1}, (_, i) => lo + i);
+}
+function renderCell(g, c, orig) {
+  let val = (changes[curSample] && changes[curSample][c] !== undefined) ? changes[curSample][c] : orig[c];
+  val = val ?? '';
+  const dirty = (changes[curSample] && changes[curSample][c] !== undefined) ? 'dirty' : '';
+  const empty = (String(val).trim() === '') ? 'empty' : '';
+  const lbl = `<label>${c}</label>`;
+  // 双维度量表(如 EMBU 父/母)：值是 {"父亲":x,"母亲":y}，分两行小input+选项条
+  if (g.sub_keys) {
+    let dimVal = {};
+    try { dimVal = typeof val === 'string' && val.trim().startsWith('{') ? JSON.parse(val) : {}; } catch (e) {}
+    const nums = optNums(g.option_range);
+    const rows = g.sub_keys.map(k => {
+      const dv = (dimVal[k] !== undefined && dimVal[k] !== null) ? String(dimVal[k]) : '';
+      const pills = nums.map(n => `<span class="${String(n) === dv ? 'on' : ''}" data-v="${n}">${n}</span>`).join('');
+      return `<div class="dimrow"><span class="dk">${esc(k)}</span>
+        <input class="num ${dv === '' ? 'empty' : ''}" data-col="${c}" data-dim="${esc(k)}" value="${esc(dv)}">
+        <div class="opts">${pills}</div></div>`;
+    }).join('');
+    return `<div class="cell">${lbl}<div style="flex:1;display:flex;flex-direction:column;gap:2px">${rows}</div></div>`;
+  }
+  // 单维度量表(有 option_range)：小input + 纸质版选项条
+  if (g.option_range) {
+    const nums = optNums(g.option_range);
+    const v = String(val).trim();
+    const pills = nums.map(n => `<span class="${String(n) === v ? 'on' : ''}" data-v="${n}">${n}</span>`).join('');
+    return `<div class="cell">${lbl}
+      <input class="num ${dirty} ${empty}" data-col="${c}" value="${esc(v)}">
+      <div class="opts">${pills}</div></div>`;
+  }
+  // 其他(基本信息/填空题/第2页)：普通宽输入框
+  return `<div class="cell">${lbl}<input class="wide ${dirty} ${empty}" data-col="${c}" value="${esc(String(val))}"></div>`;
+}
+// 双维度 input 联动(改某维度 → 更新 JSON)
+function syncDim(inp, orig) {
+  const c = inp.dataset.col, dim = inp.dataset.dim;
+  let cur = {};
+  const base = (changes[curSample] && changes[curSample][c] !== undefined) ? changes[curSample][c] : orig[c];
+  try { cur = typeof base === 'string' && base.trim().startsWith('{') ? JSON.parse(base) : {}; } catch (e) {}
+  if (inp.value.trim() === '') delete cur[dim]; else cur[dim] = inp.value.trim();
+  const json = Object.keys(cur).length ? JSON.stringify(cur) : '';
+  setVal(c, json, orig, null);
+  inp.classList.toggle('empty', inp.value.trim() === '');
+}
+function changePage(d) {
+  const np = Math.max(1, Math.min(TOTAL_PAGES, curPage + d));
+  if (np !== curPage) { curPage = np; render(); }
+}
+function changeSample(d) {
+  const ns = Math.max(0, Math.min(DATA.samples.length - 1, curSample + d));
+  if (ns !== curSample) { curSample = ns; if (resetPageOnSample) curPage = 1; shownLastHint = false; render(); }
+}
+function toggleResetPage() {
+  resetPageOnSample = !resetPageOnSample;
+  const b = document.getElementById('resetPageBtn');
+  b.textContent = '↻切样本回首页:' + (resetPageOnSample ? '开' : '关');
+  b.style.background = resetPageOnSample ? '#eef2f7' : '#fff';
+}
+function esc(s) { return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function save() {
+  const ch = [];
+  for (const ri in changes) for (const c in changes[ri]) ch.push({ row: +ri, col: c, value: changes[ri][c] });
+  if (!ch.length) { document.getElementById('status').textContent = '无修改'; return; }
+  document.getElementById('status').textContent = '保存中…';
+  const r = await (await fetch('/api/save', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ changes: ch }) })).json();
+  document.getElementById('status').textContent = `已保存 ${r.saved} 处`;
+  changes = {};
+  await reload();
+}
+async function reload() {
+  DATA = await (await fetch('/api/data')).json();
+  render();
+  loadIssues();
+}
+// 键盘：←→切样本，↑↓翻页（输入框聚焦时不响应，避免干扰编辑）
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+  if (e.key === 'ArrowLeft') { changeSample(-1); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { changeSample(1); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { changePage(-1); e.preventDefault(); }
+  else if (e.key === 'ArrowDown') { changePage(1); e.preventDefault(); }
+});
+// 备份/恢复（备份只读，防止数据丢失）
+async function loadBackupList() {
+  const r = await (await fetch('/api/backups')).json();
+  const sel = document.getElementById('backupList');
+  const cur = sel.value;
+  sel.innerHTML = (r.backups && r.backups.length)
+    ? r.backups.map(b => `<option value="${b}">${b}</option>`).join('')
+    : '<option value="">(无备份)</option>';
+  if (cur && r.backups.includes(cur)) sel.value = cur;
+}
+async function doBackup() {
+  if (!confirm('备份当前 results.csv？（备份只读，不可被修改）')) return;
+  document.getElementById('backupBtn').textContent = '备份中…';
+  const r = await (await fetch('/api/backup', { method: 'POST' })).json();
+  document.getElementById('backupBtn').textContent = '💾 备份';
+  if (r.ok) { document.getElementById('status').textContent = '已备份 ' + r.name; loadBackupList(); }
+  else { alert('备份失败: ' + (r.err || '')); }
+}
+async function doRestore() {
+  const name = document.getElementById('backupList').value;
+  if (!name) { alert('请先选择备份'); return; }
+  if (!confirm(`从 ${name} 恢复？当前未保存的修改将丢失`)) return;
+  const r = await (await fetch('/api/restore', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ name }) })).json();
+  if (r.ok) { changes = {}; await reload(); loadBackupList(); document.getElementById('status').textContent = '已恢复 ' + name; }
+  else { alert('恢复失败'); }
+}
+loadBackupList();
+load();
+</script>
+</body>
+</html>
