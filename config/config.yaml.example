@@ -1,0 +1,74 @@
+# ============================================================
+# 纸质问卷识别系统 - 主配置（示例文件）
+# ============================================================
+# 用法：复制本文件为 config.yaml，填入你的 API key 后使用。
+#   命令行：copy config\config.yaml.example config.yaml
+#
+# 推荐服务商(OpenAI 兼容接口)：
+#   通义千问: base_url: https://dashscope.aliyuncs.com/compatible-mode/v1  model: qwen-vl-max
+#   智谱GLM:  base_url: https://open.bigmodel.cn/api/paas/v4              model: glm-4v
+#   OpenAI:   base_url: https://api.openai.com/v1                         model: gpt-4o
+# ============================================================
+
+llm:
+  api_key_env: "sk-在这里填你的API_KEY"                              # ← 改成你的 key
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"   # ← 改成你的服务商
+  model: "qwen-vl-max"                                            # ← 改成你的模型
+  timeout: 120
+  max_retries: 3
+  temperature: 0.0
+  max_image_long_edge: 2200    # 上送前把图像长边缩放到此像素，控制 token
+  json_mode: true              # 优先请求 response_format=json_object(不支持则回退)
+
+paths:
+  work_dir: "./work"
+  out_csv: "./out/results.csv"
+  log_dir: "./logs"
+  review_dir: "./work/review"
+  template_yaml: "./config/scales.yaml"
+
+pdf:
+  dpi: 200
+  # page_map: 每个源页(共20项) 来自哪个 PDF 页 + 哪一侧。
+  #   "s"=单页(整页)；"L"=横向页左半；"R"=横向页右半。
+  page_map:
+    - [1, "s"]    # src_01  (第1页: 编号/姓名/调查时间)
+    - [2, "L"]    # src_02  (第2页: 17题混题)
+    - [2, "R"]    # src_03
+    - [3, "L"]    # src_04
+    - [3, "R"]    # src_05
+    - [4, "L"]    # src_06
+    - [4, "R"]    # src_07
+    - [5, "L"]    # src_08
+    - [5, "R"]    # src_09
+    - [6, "L"]    # src_10
+    - [6, "R"]    # src_11
+    - [7, "L"]    # src_12
+    - [7, "R"]    # src_13
+    - [8, "L"]    # src_14
+    - [8, "R"]    # src_15
+    - [9, "L"]    # src_16
+    - [9, "R"]    # src_17
+    - [10, "L"]   # src_18
+    - [10, "R"]   # src_19
+    - [11, "s"]   # src_20
+
+preprocess:
+  gutter_max_width_pct: 0.15   # 中缝黑边宽度超过页宽此比例则告警
+  deskew_enabled: false        # 默认关闭(扫描较正，开启会增加耗时)
+  deskew_max_angle: 5.0
+  normalize_long_edge: 2200    # 预处理后统一长边像素
+
+infer:
+  scale_padding_pct: 0.03      # 切分量表 bbox 外扩比例(软裁剪留余量)
+  confidence_warn: 0.6         # 低于此置信度记 WARN
+  small_scale_item_threshold: 8     # 题数≤此值的量表直接整页问，省去切分
+  whole_page_for_small_scales: true
+
+induct:
+  expected_total_scales: 21    # 期望量表总数(全局约束)
+  per_page_retry: 1            # 每页归纳异常时的二次精问次数
+
+csv:
+  columns_order: "template"    # 按 scales.yaml 顺序排量表列
+  null_token: ""               # 缺失/未答的占位符

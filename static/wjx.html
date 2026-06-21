@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>问卷星批量导入</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; font-size: 14px; margin: 0; padding: 20px; background: #f5f6f8; }
+  h2 { margin: 0 0 16px; }
+  .card { background: #fff; border: 1px solid #e2e5ea; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+  label { display: inline-block; margin-right: 12px; }
+  input[type=text] { padding: 5px 8px; border: 1px solid #bbc; border-radius: 4px; width: 160px; }
+  button { padding: 6px 16px; border: 1px solid #195; border-radius: 4px; background: #2a6; color: #fff; cursor: pointer; font-size: 14px; }
+  button:disabled { background: #aaa; border-color: #aaa; cursor: not-allowed; }
+  .samples { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sample { padding: 6px 10px; border: 1px solid #dde; border-radius: 4px; background: #fafbfc; }
+  .sample input { margin-right: 4px; }
+  .sample.checked { background: #eaf6ee; border-color: #2a6; }
+  .sample.wjx-submitted { background: #e8f0fe; border-color: #39c; }
+  .sample.wjx-error { background: #fdecea; border-color: #c33; }
+  .st-tag { font-size: 11px; padding: 1px 6px; border-radius: 8px; margin-left: 4px; color: #fff; }
+  .st-submitted { background: #39c; } .st-error { background: #c33; } .st-pending { background: #999; }
+  #progress { font-family: monospace; font-size: 13px; }
+  .res { padding: 4px 0; border-bottom: 1px solid #f0f2f5; }
+  .res.ok { color: #2a6; } .res.fail { color: #c33; } .res.pending { color: #e90; }
+  .bar { height: 18px; background: #eef; border-radius: 9px; overflow: hidden; margin: 8px 0; }
+  .bar > div { height: 100%; background: #2a6; transition: width .3s; }
+  .hint { color: #789; font-size: 12px; }
+</style>
+</head>
+<body>
+<h2>📋 问卷星批量导入</h2>
+<div class="card">
+  <label>问卷星提交链接：</label>
+  <input type="text" id="wjxUrl" style="width:60%" placeholder="https://www.wjx.cn/vm/xxxxx.aspx">
+  <button class="ghost" onclick="saveUrl()" style="background:#fff;color:#357;border-color:#9bc">💾 保存链接</button>
+  <span id="urlMsg" class="hint"></span>
+</div>
+<div class="card">
+  <label>录入人缩写：<input type="text" id="recorder" value="default"></label>
+  <label><input type="checkbox" id="autoTag"> 录入人后加"(自动化)"</label>
+  <label><input type="checkbox" id="submit" checked> 自动提交</label>
+  <label><input type="checkbox" id="headless"> 无头模式(不弹窗，遇验证码会失败)</label>
+  <div class="hint">推荐：勾选自动提交 + 不勾无头模式（弹窗，遇验证码人工过）</div>
+</div>
+<div class="card">
+  <b>选择样本</b>（仅显示已核对）<span style="float:right">
+    <a href="#" onclick="checkAll(true)">全选</a> /
+    <a href="#" onclick="checkAll(false)">全不选</a>
+  </span>
+  <div id="samples" class="samples" style="margin-top:10px"></div>
+</div>
+<div class="card">
+  <button id="startBtn" onclick="start()">🚀 开始导入</button>
+  <span id="statusText" class="hint"></span>
+  <div class="bar"><div id="barFill" style="width:0"></div></div>
+  <div id="progress"></div>
+</div>
+<div id="captchaBox" class="card" style="display:none;border-color:#e90;background:#fff8e1">
+  <b>⚠ 需要人工干预（验证码）</b>
+  <div id="captchaInfo" style="margin:8px 0;color:#567"></div>
+  <button onclick="captchaDone()" style="background:#e90;border-color:#c80">✓ 我已在窗口完成验证+提交</button>
+</div>
+
+<script>
+let DATA = null;
+async function loadUrl() {
+  const r = await (await fetch('/api/wjx_url')).json();
+  document.getElementById('wjxUrl').value = r.url || '';
+}
+async function saveUrl() {
+  const url = document.getElementById('wjxUrl').value.trim();
+  if (!url) { alert('请输入链接'); return; }
+  const r = await (await fetch('/api/wjx_url', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ url }) })).json();
+  document.getElementById('urlMsg').textContent = r.ok ? '已保存 ✓' : '保存失败';
+  setTimeout(() => document.getElementById('urlMsg').textContent = '', 2000);
+}
+async function load() {
+  DATA = await (await fetch('/api/data')).json();
+  const box = document.getElementById('samples');
+  const checked = DATA.checked || {};
+  const sub = DATA.wjx_submit || {};
+  const items = DATA.samples.filter(s => checked[String(s.idx)]);
+  box.innerHTML = items.length ? items.map(s => {
+    const st = sub[String(s.idx)];
+    const cls = st === 'submitted' ? 'wjx-submitted' : (st === 'error' ? 'wjx-error' : '');
+    const tag = st === 'submitted' ? '<span class="st-tag st-submitted">已提交</span>'
+              : st === 'error' ? '<span class="st-tag st-error">异常</span>'
+              : '<span class="st-tag st-pending">未提交</span>';
+    return `<div class="sample checked ${cls}"><label><input type="checkbox" data-idx="${s.idx}" checked>
+      ${s.subject_id || ('样本'+(s.idx+1))} — ${s.name.slice(-12)} ${tag}</label></div>`;
+  }).join('') : '<div class="hint">没有已核对样本（请在核对页先标记）</div>';
+}
+function checkAll(v) {
+  document.querySelectorAll('input[data-idx]').forEach(c => c.checked = v);
+}
+async function start() {
+  const idxs = [...document.querySelectorAll('input[data-idx]:checked')].map(c => +c.dataset.idx);
+  if (!idxs.length) { alert('请先选择样本'); return; }
+  const recorder = (document.getElementById('recorder').value.trim() || 'default')
+    + (document.getElementById('autoTag').checked ? '(自动化)' : '');
+  const submit = document.getElementById('submit').checked;
+  const headless = document.getElementById('headless').checked;
+  if (!confirm(`将${submit?'填写并提交':'仅填写'} ${idxs.length} 份样本到问卷星？${submit&&!headless?'（会弹浏览器窗口，遇验证码请人工过）':''}`)) return;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('statusText').textContent = '启动中…';
+  const r = await (await fetch('/api/wjx_import', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ samples: idxs, recorder, submit, headless }) })).json();
+  if (!r.ok) { alert(r.err || '启动失败'); document.getElementById('startBtn').disabled = false; return; }
+  poll();
+}
+let pollTimer = null;
+async function poll() {
+  const s = await (await fetch('/api/wjx_status')).json();
+  const pct = s.total ? (s.done / s.total * 100) : 0;
+  document.getElementById('barFill').style.width = pct + '%';
+  const stage = s.current && s.current.stage ? '「'+s.current.stage+'」' : '';
+  document.getElementById('statusText').textContent = s.running
+    ? `进行中 ${s.done}/${s.total}${s.current ? '（当前：'+s.current.subject_id+stage+'）' : ''}`
+    : `完成 ${s.done}/${s.total}`;
+  const subMap = {ok:'✓成功', pending:'⚠未成功(必填校验?)', captcha:'⚠验证码', fail:'✗失败', '-':'—(仅填写)'};
+  document.getElementById('progress').innerHTML = (s.results||[]).map(r => {
+    const sub = r.submit || '';
+    const cls = sub === 'ok' ? 'ok' : (sub === 'fail' || r.error ? 'fail' : (sub === 'captcha' || sub === 'pending' ? 'pending' : ''));
+    const subTxt = r.error ? '✗'+r.error : (subMap[r.submit] || r.submit || '—');
+    return `<div class="res ${cls}">样本 ${r.subject_id||r.idx}: 填${r.filled??'?'}项 → 提交${subTxt}</div>`;
+  }).join('');
+  if (s.running) { pollTimer = setTimeout(poll, 1500); }
+  else { document.getElementById('startBtn').disabled = false; clearTimeout(pollTimer); load(); }
+  // 无头遇验证码：弹有头窗口，提示人工处理
+  const cw = s.captcha_wait;
+  const box = document.getElementById('captchaBox');
+  if (cw && box.style.display === 'none') {
+    box.style.display = 'block';
+    document.getElementById('captchaInfo').textContent =
+      `样本 ${cw.subject_id} 遇验证码，已在弹出的浏览器窗口填好，请：过验证码 → 点提交 → 成功后点下方按钮`;
+  } else if (!cw && box) {
+    box.style.display = 'none';
+  }
+}
+async function captchaDone() {
+  await fetch('/api/captcha_done', { method: 'POST' });
+  document.getElementById('captchaBox').style.display = 'none';
+  document.getElementById('statusText').textContent = '人工完成，继续…';
+}
+loadUrl(); load();
+</script>
+</body>
+</html>

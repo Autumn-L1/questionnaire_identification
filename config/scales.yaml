@@ -1,0 +1,802 @@
+version: 1
+inducted_from: data
+total_scales: 38
+scales:
+- id: S01
+  group: 一
+  unit_label: 主
+  title: 1. 你参加了一次考试，结果拿到了很差的分数
+  source_pages:
+  - 3
+  n_items: 4
+  answer_style: check
+  first_q: 1
+  last_q: 4
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.03
+  - 0.21
+  - 0.81
+  - 0.506
+  bbox_page: 3
+  notes: 聚焦归纳自3份样本(量表一源页3)
+- id: S02
+  group: 一
+  unit_label: 主
+  title: 2. 你想去一个朋友的聚会，但是没有人邀请你
+  source_pages:
+  - 3
+  n_items: 4
+  answer_style: check
+  first_q: 1
+  last_q: 4
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.03
+  - 0.519
+  - 0.81
+  - 0.811
+  bbox_page: 3
+  notes: 聚焦归纳自3份样本(量表一源页3)
+- id: S03
+  group: 一
+  unit_label: 主
+  title: 3. 你这学期的成绩单上拿到了很差的成绩
+  source_pages:
+  - 4
+  n_items: 4
+  answer_style: circle
+  first_q: 1
+  last_q: 4
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.23
+  - 0.1
+  - 0.97
+  - 0.39
+  bbox_page: 4
+  notes: 聚焦归纳自3份样本(量表一源页4)
+- id: S04
+  group: 一
+  unit_label: 主
+  title: 4. 你和你的父母大吵了一架
+  source_pages:
+  - 4
+  n_items: 4
+  answer_style: circle
+  first_q: 1
+  last_q: 4
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.23
+  - 0.4
+  - 0.97
+  - 0.71
+  bbox_page: 4
+  notes: 聚焦归纳自3份样本(量表一源页4)
+- id: S05
+  group: 一
+  unit_label: 主
+  title: 5. 有人说了一些关于你外貌的坏话
+  source_pages:
+  - 4
+  n_items: 1
+  answer_style: circle
+  first_q: 1
+  last_q: 1
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.23
+  - 0.72
+  - 0.97
+  - 0.82
+  bbox_page: 4
+  notes: 聚焦归纳自3份样本(量表一源页4)
+- id: S06
+  group: 一
+  unit_label: 主
+  title: 这个原因只会影响这一件事，还是会影响你生活的所有方面？
+  source_pages:
+  - 5
+  n_items: 3
+  answer_style: check
+  first_q: 1
+  last_q: 3
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.04
+  - 0.08
+  - 0.82
+  - 0.29
+  bbox_page: 5
+  notes: 聚焦归纳自1份样本(量表一源页5)
+- id: S07
+  group: 一
+  unit_label: 子量表1
+  title: 6. 你没能评选上三好学生，但你本来很想被评选上
+  source_pages:
+  - 5
+  n_items: 4
+  answer_style: check
+  first_q: 1
+  last_q: 4
+  is_sub: true
+  notes: 手动修正(n_items 5→4，原识别多1题S07_5)
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.04
+  - 0.31
+  - 0.82
+  - 0.62
+  bbox_page: 5
+  notes: 聚焦归纳自1份样本(量表一源页5)
+- id: S08
+  group: 二
+  unit_label: 主
+  title: 二、请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打"√"。
+  source_pages:
+  - 5
+  n_items: 7
+  answer_style: check
+  first_q: 1
+  last_q: 7
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.0239
+  - 0.628
+  - 0.76
+  - 0.842
+  bbox_page: 5
+  notes: 聚焦归纳自3份样本(量表二源页5)
+- id: S09
+  group: 三
+  unit_label: 主
+  title: 我会花费时间思考或计划刷短视频
+  source_pages:
+  - 6
+  n_items: 6
+  answer_style: check
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.23
+  - 0.14
+  - 0.97
+  - 0.28
+  bbox_page: 6
+  notes: 聚焦归纳自3份样本(量表三源页6)
+- id: S10
+  group: 三
+  unit_label: 子量表1
+  title: 每天刷短视频的频率(一般情况)
+  source_pages:
+  - 6
+  n_items: 1
+  answer_style: check
+  first_q: 1
+  last_q: 1
+  is_sub: true
+  option_range:
+  - 0
+  - 3
+  bbox_nominal:
+  - 0.23
+  - 0.31
+  - 0.97
+  - 0.35
+  bbox_page: 6
+  notes: 聚焦归纳自3份样本(量表三源页6)
+- id: S11
+  group: 三
+  unit_label: 子量表2
+  title: 单次刷短视频的时长(一般情况)
+  source_pages:
+  - 6
+  n_items: 1
+  answer_style: check
+  first_q: 1
+  last_q: 1
+  is_sub: true
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.37
+  - 0.97
+  - 0.41
+  bbox_page: 6
+  notes: 聚焦归纳自3份样本(量表三源页6)
+- id: S12
+  group: 四
+  unit_label: 主
+  title: 我猜不出他人的想法
+  source_pages:
+  - 6
+  n_items: 9
+  answer_style: check
+  first_q: 1
+  last_q: 9
+  option_range:
+  - 1
+  - 7
+  bbox_nominal:
+  - 0.23
+  - 0.45
+  - 0.97
+  - 0.83
+  bbox_page: 6
+  notes: 聚焦归纳自3份样本(量表四源页6)
+- id: S13
+  group: 五
+  unit_label: 主
+  title: 五、我们在成长过程中对父亲和母亲的管教与养育我们的方式会有深刻的印象，请仔细回想父母在日常生活中与你相处的方式并分别选择最适合你父亲或母亲的对应选项。如果一直以来仅和其中的一方一起生活，可以只在父亲或母亲一栏作答。
+  source_pages:
+  - 7
+  n_items: 12
+  answer_style: circle
+  first_q: 1
+  last_q: 12
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.03
+  - 0.19
+  - 0.76
+  - 0.82
+  bbox_page: 7
+  sub_keys:
+  - 父亲
+  - 母亲
+  notes: 聚焦归纳自3份样本(量表五源页7)
+- id: S14
+  group: 五
+  unit_label: 主
+  title: 13 我能通过父/母亲的言谈、表情，感受到她很喜欢我
+  source_pages:
+  - 8
+  n_items: 9
+  answer_style: circle
+  first_q: 13
+  last_q: 21
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.25
+  - 0.11
+  - 0.97
+  - 0.54
+  bbox_page: 8
+  sub_keys:
+  - 父亲
+  - 母亲
+  notes: 聚焦归纳自3份样本(量表五源页8)
+- id: S15
+  group: 六
+  unit_label: 主
+  title: 六、请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打“√”。
+  source_pages:
+  - 9
+  n_items: 16
+  answer_style: check
+  first_q: 1
+  last_q: 16
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.04
+  - 0.12
+  - 0.75
+  - 0.54
+  bbox_page: 9
+  notes: 聚焦归纳自3份样本(量表六源页9)
+- id: S16
+  group: 七
+  unit_label: 主
+  title: 七、请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打“√”。
+  source_pages:
+  - 9
+  n_items: 10
+  answer_style: check
+  first_q: 1
+  last_q: 10
+  option_range:
+  - 0
+  - 4
+  bbox_nominal:
+  - 0.0239
+  - 0.4446
+  - 0.6205
+  - 0.683
+  bbox_page: 9
+  notes: 聚焦归纳自3份样本(量表七源页9)
+- id: S17
+  group: 八
+  unit_label: 主
+  title: 你是否实施过不是想轻生的自我伤害行为？请根据实际情况，在相应的数字上打"√"。
+  source_pages:
+  - 10
+  n_items: 5
+  answer_style: check
+  first_q: 1
+  last_q: 5
+  option_range:
+  - 0
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.18
+  - 0.98
+  - 0.53
+  bbox_page: 10
+  notes: 聚焦归纳自3份样本(量表八源页10)
+- id: S18
+  group: 八
+  unit_label: 子量表1
+  title: 如果你实施伤害自己的行为的原因是什么（没有轻生的想法）？下面列举了一些可能的原因，请根据你自身的实际情况在相应的数字上打勾√。
+  source_pages:
+  - 10
+  n_items: 5
+  answer_style: check
+  first_q: 1
+  last_q: 5
+  is_sub: true
+  option_range:
+  - 0
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.56
+  - 0.98
+  - 0.83
+  bbox_page: 10
+  notes: 聚焦归纳自3份样本(量表八源页10)
+- id: S18a
+  group: 八
+  unit_label: 子量表1续
+  title: 你实施伤害自己的行为的原因(续，题6-16)：下面列举了一些可能的原因，请根据你自身的实际情况在相应的数字上打勾√。
+  source_pages:
+  - 11
+  n_items: 11
+  answer_style: check
+  first_q: 6
+  last_q: 16
+  is_sub: true
+  option_range:
+  - 0
+  - 4
+  bbox_nominal:
+  - 0.08
+  - 0.05
+  - 0.97
+  - 0.48
+  bbox_page: 11
+  notes: 手动补充(量表八子量表1源页11续，聚焦归纳漏识别)
+- id: S19
+  group: 九
+  unit_label: 主
+  title: 九、本学期从开学后到现在这段时间里，你在学校里曾经被其他同学以下列其中任何一种方式欺负过吗？请在对应的选项上划“√”。
+  source_pages:
+  - 11
+  n_items: 6
+  answer_style: check
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.487
+  - 0.752
+  - 0.829
+  bbox_page: 11
+  notes: 聚焦归纳自3份样本(量表九源页11)
+- id: S20
+  group: 十
+  unit_label: 主
+  title: 十、本学期从开学后到现在这段时间里，你在学校里曾经以下列其中任何一种方式欺负过其他同学吗？请在对应的选项上划“√”。
+  source_pages:
+  - 12
+  n_items: 6
+  answer_style: check
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.24
+  - 0.15
+  - 0.97
+  - 0.44
+  bbox_page: 12
+  notes: 聚焦归纳自3份样本(量表十源页12)
+- id: S21
+  group: 十一
+  unit_label: 主
+  title: 十一、请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打"√"。
+  source_pages:
+  - 12
+  n_items: 8
+  answer_style: check
+  first_q: 1
+  last_q: 8
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.56
+  - 0.97
+  - 0.83
+  bbox_page: 12
+  notes: 聚焦归纳自3份样本(量表十一源页12)
+- id: S22
+  group: 十二
+  unit_label: 主
+  title: 1.这段时间的睡眠时长和质量如何？白天精力充沛吗？
+  source_pages:
+  - 13
+  n_items: 7
+  answer_style: check
+  first_q: 1
+  last_q: 7
+  option_range:
+  - 1
+  - 10
+  bbox_nominal:
+  - 0.0205
+  - 0.1228
+  - 0.6521
+  - 0.5263
+  bbox_page: 13
+  notes: 聚焦归纳自3份样本(量表十二源页13)
+- id: S23
+  group: 十三
+  unit_label: 主
+  title: 十三、请根据实际情况，选择最近两周下列事件发生的频率。请在对应的选项上划"√"。
+  source_pages:
+  - 14
+  n_items: 10
+  answer_style: check
+  first_q: 1
+  last_q: 10
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.13
+  - 0.97
+  - 0.43
+  bbox_page: 14
+  notes: 聚焦归纳自3份样本(量表十三源页14)
+- id: S24
+  group: 十四
+  unit_label: 主
+  title: 十四、本问卷调查的是你的成长经历。请根据从以下五个选项中选出最适合您情况的答案，如果您不是很清楚，请尽量估计。通常情况下，您遭受下列家庭暴力有多频繁？
+  source_pages:
+  - 14
+  n_items: 6
+  answer_style: check
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 0
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.5
+  - 0.97
+  - 0.83
+  bbox_page: 14
+  notes: 聚焦归纳自3份样本(量表十四源页14)
+- id: S25
+  group: 十五
+  unit_label: 主
+  title: 1.以下是一些人们在应对创伤性或压力性事件（创伤性事件指的是会让你感到很痛苦很伤心的事情）时可能会出现的问题，请想一件现在让你最困扰的创伤性事件，然后在右边圈出其中一个数字，代表你在过去一个月被那件事情困扰的程度。
+  source_pages:
+  - 15
+  n_items: 6
+  answer_style: circle
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.17
+  - 0.78
+  - 0.39
+  bbox_page: 15
+  notes: 聚焦归纳自3份样本(量表十五源页15)
+- id: S26
+  group: 十五
+  unit_label: 子量表1
+  title: 请回答以上问题有没有干扰或者影响到你的以下方面：
+  source_pages:
+  - 15
+  n_items: 4
+  answer_style: circle
+  first_q: 1
+  last_q: 4
+  is_sub: true
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.42
+  - 0.78
+  - 0.56
+  bbox_page: 15
+  notes: 聚焦归纳自3份样本(量表十五源页15)
+- id: S27
+  group: 十五
+  unit_label: 主
+  title: 以下是曾经经历创伤或压力事件的人会出现的问题，有关你的感受、对自己和别人的想法。圈出①、②、③、④或⑤代表你在过去一个月被那件事情所困扰的程度。
+  source_pages:
+  - 16
+  n_items: 6
+  answer_style: circle
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.23
+  - 0.14
+  - 0.97
+  - 0.28
+  bbox_page: 16
+  notes: 聚焦归纳自3份样本(量表十五源页16)
+- id: S28
+  group: 十五
+  unit_label: 子量表2
+  title: 请回答以上问题有没有干扰或者影响到你的以下方面：
+  source_pages:
+  - 16
+  n_items: 4
+  answer_style: circle
+  first_q: 1
+  last_q: 4
+  is_sub: true
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.23
+  - 0.29
+  - 0.97
+  - 0.41
+  bbox_page: 16
+  notes: 聚焦归纳自3份样本(量表十五源页16)
+- id: S29
+  group: 十六
+  unit_label: 主
+  title: 十六、请根据你的实际情况，最近两周，下列事件发生的频率。请在对应的选项上划"√"。
+  source_pages:
+  - 16
+  n_items: 7
+  answer_style: check
+  first_q: 1
+  last_q: 7
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.23
+  - 0.52
+  - 0.98
+  - 0.73
+  bbox_page: 16
+  notes: 聚焦归纳自3份样本(量表十六源页16)
+- id: S30
+  group: 十七
+  unit_label: 主
+  title: 一.想一个你经常见到的亲戚或朋友（现在不在你身边），并将他/她的形象尽量生动地呈现在你的脑海中。
+  source_pages:
+  - 17
+  n_items: 4
+  answer_style: circle
+  first_q: 1
+  last_q: 4
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.21
+  - 0.78
+  - 0.32
+  bbox_page: 17
+  notes: 聚焦归纳自3份样本(量表十七源页17)
+- id: S31
+  group: 十七
+  unit_label: 子量表1
+  title: 二.设想太阳升起时的场景。请尽量在脑海中呈现该场景。
+  source_pages:
+  - 17
+  n_items: 4
+  answer_style: circle
+  first_q: 5
+  last_q: 8
+  is_sub: true
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.33
+  - 0.78
+  - 0.44
+  bbox_page: 17
+  notes: 聚焦归纳自3份样本(量表十七源页17)
+- id: S32
+  group: 十七
+  unit_label: 子量表2
+  title: 三.想一家你经常光顾的商店。把该场景尽量形象地呈现在你脑海中。
+  source_pages:
+  - 17
+  n_items: 4
+  answer_style: circle
+  first_q: 9
+  last_q: 12
+  is_sub: true
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.45
+  - 0.78
+  - 0.55
+  bbox_page: 17
+  notes: 聚焦归纳自3份样本(量表十七源页17)
+- id: S33
+  group: 十七
+  unit_label: 子量表3
+  title: 四.最后，请想一个有树木、山丘和湖的场景，并将该场景呈现在自己脑海中。
+  source_pages:
+  - 17
+  n_items: 4
+  answer_style: circle
+  first_q: 13
+  last_q: 16
+  is_sub: true
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.56
+  - 0.78
+  - 0.66
+  bbox_page: 17
+  notes: 聚焦归纳自3份样本(量表十七源页17)
+- id: S34
+  group: 十八
+  unit_label: 主
+  title: 部分一：阅读每一句话，然后尽力回想相应人、物或场景，并将该画面尽可能生动地在脑海中展现。当你对发生在你身上的场景有一个心理图像时，请用5分制对每个图像的生动程度进行评分。
+  source_pages:
+  - 18
+  n_items: 20
+  answer_style: check
+  first_q: 1
+  last_q: 20
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.24
+  - 0.25
+  - 0.98
+  - 0.76
+  bbox_page: 18
+  notes: 聚焦归纳自3份样本(量表十八源页18)
+- id: S35
+  group: 十八
+  unit_label: 子量表1
+  title: 部分二：阅读每一句话，然后想象未来发生在你身上的每一种情景。当你对发生在你身上的场景有一个心理图像时，请用5分制对每个图像的生动程度进行评分。
+  source_pages:
+  - 19
+  n_items: 20
+  answer_style: check
+  first_q: 1
+  last_q: 20
+  is_sub: true
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.04
+  - 0.13
+  - 0.76
+  - 0.61
+  bbox_page: 19
+  notes: 聚焦归纳自3份样本(量表十八源页19)
+- id: S36
+  group: 十九
+  unit_label: 主
+  title: 十九、请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打"√"。
+  source_pages:
+  - 19
+  n_items: 6
+  answer_style: check
+  first_q: 1
+  last_q: 6
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.03
+  - 0.642
+  - 0.75
+  - 0.812
+  bbox_page: 19
+  notes: 聚焦归纳自3份样本(量表十九源页19)
+- id: S37
+  group: 二十
+  unit_label: 主
+  title: 二十、请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打"√"。
+  source_pages:
+  - 20
+  n_items: 10
+  answer_style: check
+  first_q: 1
+  last_q: 10
+  option_range:
+  - 1
+  - 5
+  bbox_nominal:
+  - 0.12
+  - 0.13
+  - 0.87
+  - 0.41
+  bbox_page: 20
+  notes: 聚焦归纳自3份样本(量表二十源页20)
+- id: S38
+  group: 二十一
+  unit_label: 主
+  title: 二十一、请回想一下，在困难、负担重、压力大或关键时刻，你通常如何表现，以及你通常的感受和想法。请认真阅读每一题，并在每一题目后面符合自己真实情况的选项上打“√”。
+  source_pages:
+  - 20
+  n_items: 14
+  answer_style: check
+  first_q: 1
+  last_q: 14
+  option_range:
+  - 1
+  - 4
+  bbox_nominal:
+  - 0.12
+  - 0.42
+  - 0.87
+  - 0.84
+  bbox_page: 20
+  notes: 聚焦归纳自2份样本(量表二十一源页20)

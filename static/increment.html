@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>增量扫描识别</title>
+<style>
+  body { font-family: "Microsoft YaHei", sans-serif; font-size: 14px; margin: 0; padding: 20px; background: #f5f6f8; }
+  h2 { margin: 0 0 16px; }
+  .card { background: #fff; border: 1px solid #e2e5ea; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+  button { padding: 6px 16px; border: 1px solid #195; border-radius: 4px; background: #2a6; color: #fff; cursor: pointer; }
+  button:disabled { background: #aaa; border-color: #aaa; }
+  button.ghost { background: #fff; color: #357; border-color: #9bc; }
+  .pdf { padding: 8px 12px; border: 1px solid #dde; border-radius: 4px; margin: 6px 0; display: flex; align-items: center; }
+  .pdf.new { background: #fff8e1; border-color: #f0ad4e; }
+  .pdf.done { background: #eaf6ee; border-color: #2a6; }
+  .pdf input { margin-right: 8px; }
+  .tag { font-size: 11px; padding: 1px 8px; border-radius: 8px; color: #fff; margin-left: 8px; }
+  .tag-new { background: #e90; } .tag-done { background: #2a6; }
+  .bar { height: 18px; background: #eef; border-radius: 9px; overflow: hidden; margin: 8px 0; }
+  .bar > div { height: 100%; background: #2a6; transition: width .3s; }
+  #progress { font-family: monospace; font-size: 13px; }
+  .res { padding: 3px 0; } .res.ok { color: #2a6; } .res.err { color: #c33; }
+  .nav a { margin-right: 16px; color: #357; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="nav"><a href="/">核对页</a><a href="/wjx">问卷星导入</a><a href="/increment">增量扫描</a></div>
+<h2>🔍 增量扫描识别</h2>
+<div class="card">
+  <button class="ghost" onclick="scan()">🔄 扫描 data/ 目录</button>
+  <span style="margin-left:12px"><button onclick="checkNew(true)">勾选新增</button></span>
+  <span id="scanInfo" class="tag tag-new" style="display:none"></span>
+  <div id="pdfList" style="margin-top:12px"></div>
+</div>
+<div class="card">
+  <button id="startBtn" onclick="start()" disabled>🚀 开始增量识别</button>
+  <span id="statusText" style="color:#789"></span>
+  <div class="bar"><div id="barFill" style="width:0"></div></div>
+  <div id="progress"></div>
+</div>
+
+<script>
+async function scan() {
+  const r = await (await fetch('/api/scan_pdfs')).json();
+  const list = r.pdfs || [];
+  const news = list.filter(p => !p.identified);
+  const info = document.getElementById('scanInfo');
+  info.style.display = news.length ? 'inline-block' : 'none';
+  info.textContent = news.length ? `${news.length} 个新增` : '';
+  document.getElementById('pdfList').innerHTML = list.length ? list.map(p =>
+    `<div class="pdf ${p.identified?'done':'new'}">
+      <input type="checkbox" data-name="${p.name}" ${p.identified?'':'checked'}>
+      <span>${p.name}</span>
+      <span class="tag ${p.identified?'tag-done':'tag-new'}">${p.identified?'已识别':'新增'}</span>
+    </div>`).join('') : '<div style="color:#999">data/ 目录无 PDF</div>';
+  document.getElementById('startBtn').disabled = news.length === 0;
+}
+function checkNew(v) { document.querySelectorAll('input[data-name]').forEach(c => { if(!c.disabled) c.checked=v; }); }
+async function start() {
+  const names = [...document.querySelectorAll('input[data-name]:checked')].map(c => c.dataset.name);
+  if (!names.length) { alert('请选择要识别的 PDF'); return; }
+  if (!confirm(`将增量识别 ${names.length} 个 PDF（追加到 results.csv）？`)) return;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('statusText').textContent = '启动中…';
+  const r = await (await fetch('/api/increment_import', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({pdfs: names}) })).json();
+  if (!r.ok) { alert(r.err||'启动失败'); document.getElementById('startBtn').disabled=false; return; }
+  poll();
+}
+let pt = null;
+async function poll() {
+  const s = await (await fetch('/api/increment_status')).json();
+  const pct = s.total ? s.done/s.total*100 : 0;
+  document.getElementById('barFill').style.width = pct+'%';
+  document.getElementById('statusText').textContent = s.running
+    ? `识别中 ${s.done}/${s.total}${s.current?('（'+s.current+'）'):''}` : `完成 ${s.done}/${s.total}`;
+  document.getElementById('progress').innerHTML = (s.results||[]).map(r =>
+    `<div class="res ${r.ok?'ok':'err'}">${r.pdf}: ${r.ok?('✓ subject_id='+r.subject_id):('✗ '+(r.error||'失败'))}</div>`).join('');
+  if (s.running) pt = setTimeout(poll, 2000);
+  else { document.getElementById('startBtn').disabled = false; clearTimeout(pt); scan(); }
+}
+scan();
+</script>
+</body>
+</html>

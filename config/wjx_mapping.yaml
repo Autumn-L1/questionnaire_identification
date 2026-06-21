@@ -1,0 +1,228 @@
+wjx_url: https://www.wjx.cn/vm/rXh5Uz1.aspx
+recorder_q: q1
+other_q: q65
+text:
+  q2: p2_q1
+  q3: p2_q1
+  q6:
+    col: p2_q4
+    clean: digit
+  q7: p2_q5
+  q8: p2_q6
+  q13:
+    col: p2_q11
+    clean: digit
+  q19: p2_q17
+  q42: S22_1
+  q43: S22_2
+  q44: S22_3
+  q45: S22_4
+  q46: S22_5
+  q47: S22_6
+  q48: S22_7
+split:
+  q4_1:
+    from: p2_q3
+    take: grade
+  q4_2:
+    from: p2_q3
+    take: digit
+single:
+  q5:
+    col: p2_q2
+    map:
+      男: '1'
+      女: '2'
+  q9:
+    col: p2_q7
+    map:
+      是: '1'
+      否: '2'
+    parse_bool: true
+  q10:
+    col: p2_q8
+    map:
+      已婚: '1'
+      离婚: '2'
+      丧偶: '3'
+      再婚: '4'
+      其他: '5'
+  q11:
+    col: p2_q9
+    map:
+      30分钟以下: '1'
+      30-60分钟: '2'
+      1-2小时: '3'
+      2小时以上: '4'
+  q12:
+    col: p2_q10
+    map:
+      走读: '1'
+      住校: '2'
+  q14:
+    col: p2_q12
+    map:
+      是: '1'
+      否: '2'
+    parse_bool: true
+  q16:
+    col: p2_q14
+    map:
+      低: '1'
+      中等偏下: '2'
+      中等: '3'
+      中等偏上: '4'
+      高: '5'
+  q17:
+    col: p2_q15
+    map:
+      小学: '1'
+      初中: '2'
+      高中: '3'
+      本科: '4'
+      研究生: '5'
+      不清楚: '6'
+  q18:
+    col: p2_q16
+    map:
+      小学: '1'
+      初中: '2'
+      高中: '3'
+      本科: '4'
+      研究生: '5'
+      不清楚: '6'
+  q28:
+    col: S10_1
+    numeric: true
+    shift: 1
+  q29:
+    col: S11_1
+    numeric: true
+    shift: 0
+  q34:
+    col: S17_1
+    numeric: true
+    shift: 1
+  q36:
+    col: S17_5
+    numeric: true
+    shift: 1
+ladder:
+  q: q19
+  col: p2_q17
+matrix:
+  q20:
+    scales:
+    - S01
+  q21:
+    scales:
+    - S02
+  q22:
+    scales:
+    - S03
+  q23:
+    scales:
+    - S04
+  q24:
+    cols:
+    - S05_1
+    - S06_1
+    - S06_2
+    - S06_3
+    lo: 1
+  q25:
+    cols:
+    - S07_1
+    - S07_2
+    - S07_3
+    - S07_4
+    lo: 1
+  q26:
+    scales:
+    - S08
+  q27:
+    scales:
+    - S09
+  q30:
+    scales:
+    - S12
+  q31:
+    scales:
+    - S13
+    - S14
+    dims:
+    - 父亲
+    - 母亲
+  q32:
+    scales:
+    - S15
+  q33:
+    scales:
+    - S16
+  q35:
+    cols:
+    - S17_2
+    - S17_3
+    - S17_4
+    lo: 0
+  q37:
+    scales:
+    - S18
+    - S18a
+  q39:
+    scales:
+    - S19
+  q40:
+    scales:
+    - S20
+  q41:
+    scales:
+    - S21
+  q49:
+    scales:
+    - S23
+  q50:
+    scales:
+    - S24
+  q51:
+    scales:
+    - S25
+  q52:
+    scales:
+    - S26
+  q53:
+    scales:
+    - S27
+  q54:
+    scales:
+    - S28
+  q55:
+    scales:
+    - S29
+  q56:
+    scales:
+    - S30
+  q57:
+    scales:
+    - S31
+  q58:
+    scales:
+    - S32
+  q59:
+    scales:
+    - S33
+  q60:
+    scales:
+    - S34
+  q61:
+    scales:
+    - S35
+  q62:
+    scales:
+    - S36
+  q63:
+    scales:
+    - S37
+  q64:
+    scales:
+    - S38
