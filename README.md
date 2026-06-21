@@ -24,11 +24,11 @@ cd /d D:\User\Documents
 ```
 3. 从 GitHub 克隆项目（复制下面命令，**替换成你自己的仓库地址**）：
 ```
-git clone https://github.com/Autumn-L1/------.git 问卷识别系统
+git clone https://github.com/Autumn-L1/------.git questionnaire_identification
 ```
 4. 进入项目文件夹：
 ```
-cd 问卷识别系统
+cd questionnaire_identification
 ```
 
 > 仓库地址在 GitHub 仓库页面绿色「Code」按钮里复制。后续更新：`git pull`
@@ -40,7 +40,7 @@ cd 问卷识别系统
 1. 打开命令行（`Win + R` → 输入 `cmd` 回车）
 2. 进入项目文件夹（**注意换成你自己的路径**）：
 ```
-cd /d D:\User\Documents\问卷识别系统
+cd /d D:\User\Documents\questionnaire_identification
 ```
 3. 安装所有依赖（复制下面这行，粘贴到命令行，回车）：
 ```
@@ -88,7 +88,7 @@ llm:
 
 1. 命令行进入项目目录（同第三步）：
 ```
-cd /d D:\User\Documents\问卷识别系统
+cd /d D:\User\Documents\questionnaire_identification
 ```
 2. 启动服务：
 ```
@@ -119,7 +119,7 @@ python -m src.review_server --port 8001
 注：做目前的问卷识别可以不管这一部分，因为我已经做过全量识别了，直接新增问卷就行了。
 在命令行（**新开一个 cmd**，别关掉第六步那个）输入：
 ```
-cd /d D:\User\Documents\问卷识别系统
+cd /d D:\User\Documents\questionnaire_identification
 python -m src.run batch --dir data --out out/results.csv
 ```
 等待识别完成（每份约 2 分钟，会自动拆页/识别/校验）。
@@ -178,7 +178,7 @@ python -m src.run batch --dir data --out out/results.csv
 > 如果是**全新的问卷**（题目和示例不一样），需要先做一次归纳（约10分钟）。已有 `config/scales.yaml` 的可跳过。
 
 ```
-cd /d D:\User\Documents\问卷识别系统
+cd /d D:\User\Documents\questionnaire_identification
 python -m src.run induct --focused --dir data --out config/scales.yaml
 ```
 完成后看 `work/induct/scales_review.html`（浏览器打开）核对量表切分，有问题改 `config/scales.yaml`。模板定型后日常识别不再重跑。
