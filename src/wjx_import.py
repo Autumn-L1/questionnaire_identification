@@ -47,9 +47,23 @@ def _split_grade_class(val):
 
 
 def _click_scale(page, qn: str, ridx: int, val) -> bool:
-    """点击矩阵某行(fid=qN_ridx)的选项 a[dval=val]，验证选中，偶发未中则重试1次。"""
+    """点击矩阵某行(fid=qN_ridx)的选项 a[dval=val]，验证选中，偶发未中则重试1次。
+    空值时尝试点 -99(缺失值选项)。"""
     val = str(val).strip()
     if not val or val == "null":
+        # 空值：找-99的dval，用正常路径点击(verify+重试)，比直接a.click()可靠
+        fid = f"{qn}_{ridx}"
+        dval99 = None
+        try:
+            dval99 = page.evaluate(
+                '() => { const tr = document.querySelector(\'tr[fid="' + fid + '"]\');'
+                " if (!tr) return null;"
+                " const a = [...tr.querySelectorAll('a')].find(x => (x.textContent||'').trim() === '-99');"
+                " return a ? a.getAttribute('dval') : null; }")
+        except Exception:
+            pass
+        if dval99:
+            return _click_scale(page, qn, ridx, dval99)  # 递归：用-99的dval走正常点击
         return False
     fid = f"{qn}_{ridx}"
     click_js = ("() => { const a = document.querySelector("
@@ -159,6 +173,17 @@ def fill_one(page, row: dict, mp: dict, recorder: str) -> tuple[list, list]:
 
     def click_radio(qn, value):
         if not value:
+            # 空值：点 label 文本="-99" 的缺失值选项(选择题)，无则跳过
+            try:
+                js99 = ('() => { const rs = document.querySelectorAll(\'input[name="' + qn + '"]\');'
+                        " for (const r of rs) { const l = document.querySelector('label[for=\\'' + r.id + '\\']');"
+                        " if (l && (l.textContent||'').trim() === '-99') { l.click(); r.dispatchEvent(new Event('change', {bubbles: true})); return true; } }"
+                        " return false; }")
+                if page.evaluate(js99):
+                    filled.append(qn + "(-99)")
+                    return
+            except Exception:
+                pass
             skipped.append(qn)
             return
         value = str(value)
@@ -191,13 +216,16 @@ def fill_one(page, row: dict, mp: dict, recorder: str) -> tuple[list, list]:
     # 录入人 / 其他未尽事宜
     set_text(mp["recorder_q"], recorder)
     set_text(mp["other_q"], row.get("wjx_other", ""))
-    # 填空题（支持 str 或 {col, clean} 两种格式）
+    # 填空题（支持 str 或 {col, clean, null_fill} 三种格式）
     for qn, spec in mp.get("text", {}).items():
         if isinstance(spec, dict):
             col, val = spec["col"], row.get(spec["col"], "")
             if spec.get("clean") == "digit":
                 m = re.search(r"\d+", str(val))
                 val = m.group(0) if m else ""
+            # 空值时填指定的缺失值（如年龄"0代表缺失值"）
+            if not str(val).strip() and spec.get("null_fill"):
+                val = spec["null_fill"]
         else:
             col, val = spec, row.get(spec, "")
         set_text(qn, val)

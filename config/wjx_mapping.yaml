@@ -7,6 +7,7 @@ text:
   q6:
     col: p2_q4
     clean: digit
+    null_fill: '0'    # 年龄"0代表缺失值"
   q7: p2_q5
   q8: p2_q6
   q13:
