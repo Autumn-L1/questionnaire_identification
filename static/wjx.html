@@ -101,6 +101,11 @@ function checkAll(v) {
   document.querySelectorAll('input[data-idx]').forEach(c => c.checked = v);
 }
 async function start() {
+  // 清空上次的进度/log
+  document.getElementById('barFill').style.width = '0%';
+  document.getElementById('progress').innerHTML = '';
+  document.getElementById('statusText').textContent = '';
+  document.getElementById('captchaBox').style.display = 'none';
   const idxs = [...document.querySelectorAll('input[data-idx]:checked')].map(c => +c.dataset.idx);
   if (!idxs.length) { alert('请先选择样本'); return; }
   const recorder = (document.getElementById('recorder').value.trim() || 'default')

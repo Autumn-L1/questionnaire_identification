@@ -711,6 +711,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main(port: int = PORT):
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s: %(message)s")
     print(f"\n  问卷识别核对前端已启动:  http://localhost:{port}")
     print(f"  (浏览器打开上面的地址；Ctrl+C 退出)\n")
     with ThreadingHTTPServer(("127.0.0.1", port), Handler) as s:
