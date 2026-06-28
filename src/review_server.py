@@ -111,6 +111,20 @@ def _delete_sample(idx: int):
         w = csv.writer(f)
         w.writerow(cols)
         w.writerows(rows)
+    # 调整核对/提交状态（删 idx 后，>idx 的 key 减 1）
+    for sf in [REVIEW_STATE, WJX_SUBMIT_STATE]:
+        if sf.exists():
+            try:
+                st = json.loads(sf.read_text(encoding="utf-8"))
+                new_st = {}
+                for k, v in st.items():
+                    ki = int(k)
+                    if ki == idx:
+                        continue  # 删除的样本状态丢弃
+                    new_st[str(ki - 1 if ki > idx else ki)] = v
+                sf.write_text(json.dumps(new_st, ensure_ascii=False), encoding="utf-8")
+            except (json.JSONDecodeError, ValueError, OSError):
+                pass
     log.info("[delete] 删除样本 %s(idx=%d)", sid, idx)
     return True, sid
 
