@@ -94,7 +94,7 @@ async function load() {
               : st === 'error' ? '<span class="st-tag st-error">异常</span>'
               : '<span class="st-tag st-pending">未提交</span>';
     return `<div class="sample checked ${cls}"><label><input type="checkbox" data-idx="${s.idx}" checked>
-      ${s.subject_id || ('样本'+(s.idx+1))} — ${s.name.slice(-12)} ${tag}</label></div>`;
+      ${s.subject_id || ('样本'+(s.idx+1))} — ${(s.name||'').slice(-12)} ${tag}</label></div>`;
   }).join('') : '<div class="hint">没有已核对样本（请在核对页先标记）</div>';
 }
 function checkAll(v) {
