@@ -323,8 +323,13 @@ def submit_one(page, timeout: int = 15, debug_prefix: str = None) -> str:
 
 def open_wjx(url: str, headless: bool = False):
     p = sync_playwright().start()
-    b = p.chromium.launch(headless=headless, channel="msedge")
+    b = p.chromium.launch(headless=headless, channel="msedge",
+                          args=["--disable-blink-features=AutomationControlled"])
     pg = b.new_page()
+    # stealth: 隐藏 webdriver 标志，降低被问卷星检测为自动化的概率
+    pg.add_init_script(
+        "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
+        "window.chrome = window.chrome || {runtime: {}};")
     pg.goto(url, wait_until="domcontentloaded", timeout=60000)
     pg.wait_for_timeout(4000)
     return p, b, pg
