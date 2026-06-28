@@ -88,6 +88,8 @@
   <select id="trashList" style="max-width:140px"></select>
   <button onclick="doRestoreSample()" style="background:#357;border-color:#246">♻ 恢复样本</button>
   <button id="resetPageBtn" onclick="toggleResetPage()" title="切换样本时是否回到第一页">↻切样本回首页:开</button>
+  <input type="text" id="nameSearch" placeholder="搜名字/编号" style="width:90px;padding:3px 6px;border:1px solid #bbc;border-radius:4px" onkeydown="if(event.key==='Enter')searchByName()">
+  <button onclick="searchByName()" style="background:#357;border-color:#246">🔍</button>
   <button id="checkbtn" onclick="toggleCheck()" title="标记当前样本已核对/未核对">○ 标记已核对</button>
   <button id="logbtn" onclick="toggleLog()">📋 日志</button>
   <span id="status"></span>
@@ -357,6 +359,17 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowUp') { changePage(-1); e.preventDefault(); }
   else if (e.key === 'ArrowDown') { changePage(1); e.preventDefault(); }
 });
+// 按名字/编号搜索转到样本
+function searchByName() {
+  const q = document.getElementById('nameSearch').value.trim();
+  if (!q || !DATA) return;
+  const found = DATA.samples.find(s => (s.name||'').includes(q) || (s.subject_id||'').includes(q));
+  if (found) {
+    curSample = found.idx; if(resetPageOnSample) curPage=1; shownLastHint=false;
+    render(); document.getElementById('nameSearch').value='';
+    document.getElementById('status').textContent = '已转到 ' + found.subject_id + ' ' + found.name.slice(-10);
+  } else { alert('未找到包含「' + q + '」的样本'); }
+}
 // 备份/恢复（备份只读，防止数据丢失）
 async function loadBackupList() {
   const r = await (await fetch('/api/backups')).json();
