@@ -564,6 +564,8 @@ class Handler(BaseHTTPRequestHandler):
             recorder = data.get("recorder", "default") or "default"
             submit = bool(data.get("submit", False))
             headless = bool(data.get("headless", False))
+            # 清空上次 status（防 poll 读到旧 results）
+            _write_wjx_status({"running": False, "total": 0, "done": 0, "current": None, "results": []})
             t = threading.Thread(target=_wjx_run, args=(samples, recorder, submit, headless), daemon=True)
             t.start()
             self._send(200, json.dumps({"ok": True, "started": True, "total": len(samples)}),
