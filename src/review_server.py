@@ -514,6 +514,11 @@ class Handler(BaseHTTPRequestHandler):
             return
         if u.path == "/api/wjx_stop":
             WJX_STOP_EVENT.set()
+            # 强制写 status 停止（后台线程可能卡在 fill_one，前端立即停止显示）
+            st = _read_wjx_status()
+            st["running"] = False
+            st["current"] = None
+            _write_wjx_status(st)
             self._send(200, json.dumps({"ok": True}))
             return
         if u.path == "/api/reset_submit":
