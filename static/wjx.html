@@ -142,8 +142,7 @@ async function poll() {
   }).join('');
   if (s.running) { pollTimer = setTimeout(poll, 1500); }
   else { document.getElementById('startBtn').disabled = false; clearTimeout(pollTimer); load(); }
-  // 无头遇验证码：弹有头窗口，提示人工处理
-  const cw = s.captcha_wait;
+  // 无头遇验证码：弹有头窗口，提示人工处理（cw 已在上方声明）
   const box = document.getElementById('captchaBox');
   if (cw && box.style.display === 'none') {
     box.style.display = 'block';
