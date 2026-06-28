@@ -40,6 +40,7 @@ WJX_SUBMIT_STATE = WORK / "wjx_submit_state.json"  # 每样本提交状态 {idx:
 DATA_DIR = ROOT / "data"
 INCREMENT_STATUS = WORK / "increment_status.json"
 BACKUP_DIR = WORK / "backups"
+TRASH_DIR = ROOT / "trash"   # 删除样本回收站
 PORT = 8000
 log = logging.getLogger("qr.review")
 CAPTCHA_EVENT = threading.Event()   # 无头遇验证码→有头人工干预完成信号
@@ -78,6 +79,101 @@ def _do_restore(name: str) -> bool:
         f.write(data)
     log.info("[restore] 从 %s 恢复 results.csv", name)
     return True
+
+
+def _delete_sample(idx: int):
+    """删除样本：移 pdf + work 目录到 trash/，删 results.csv 行，存行到 trash/deleted.jsonl。"""
+    import shutil
+    TRASH_DIR.mkdir(parents=True, exist_ok=True)
+    cols, rows = _read_results()
+    if not (0 <= idx < len(rows)):
+        return False, "索引无效"
+    row = rows[idx]
+    sid = row.get("subject_id", str(idx))
+    # 存删除行（供恢复）
+    with open(TRASH_DIR / "deleted_rows.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    # 移 work 目录
+    dirs = _sample_dirs()
+    if idx < len(dirs) and dirs[idx].exists():
+        shutil.move(str(dirs[idx]), str(TRASH_DIR / dirs[idx].name))
+    # 移 pdf（匹配 stem[:24]）
+    if idx < len(dirs):
+        stem24 = dirs[idx].name
+        for pdf in DATA_DIR.glob("*.pdf"):
+            if pdf.stem[:24] == stem24:
+                shutil.move(str(pdf), str(TRASH_DIR / pdf.name))
+                break
+    # 删 results.csv 行
+    rows.pop(idx)
+    with open(RESULTS, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(cols)
+        w.writerows(rows)
+    log.info("[delete] 删除样本 %s(idx=%d)", sid, idx)
+    return True, sid
+
+
+def _trash_list() -> list:
+    """列回收站里的样本（从 deleted.jsonl）。"""
+    out = []
+    p = TRASH_DIR / "deleted_rows.jsonl"
+    if p.exists():
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    d = json.loads(line)
+                    out.append({"subject_id": d.get("subject_id", ""), "name": d.get("name", "")})
+                except json.JSONDecodeError:
+                    pass
+    return out
+
+
+def _restore_sample(subject_id: str):
+    """从回收站恢复：行加回 results.csv，移 pdf/work 回原位。"""
+    import shutil
+    p = TRASH_DIR / "deleted_rows.jsonl"
+    if not p.exists():
+        return False, "无回收站记录"
+    lines = p.read_text(encoding="utf-8").splitlines()
+    restored = None
+    remaining = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            d = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not restored and d.get("subject_id") == subject_id:
+            restored = d
+        else:
+            remaining.append(line)
+    if not restored:
+        return False, "回收站无此样本"
+    # 行加回 results.csv
+    cols, rows = _read_results()
+    rows.append(restored)
+    with open(RESULTS, "w", encoding="utf-8-sig", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(cols)
+        w.writerows(rows)
+    # 移 pdf/work 回（按 subject_id/stem 匹配 trash 文件）
+    for item in TRASH_DIR.iterdir():
+        if item.is_dir() and item.name.startswith("_induct") is False:
+            dst = WORK / item.name
+            if not dst.exists():
+                shutil.move(str(item), str(dst))
+    for pdf in TRASH_DIR.glob("*.pdf"):
+        dst = DATA_DIR / pdf.name
+        if not dst.exists():
+            shutil.move(str(pdf), str(dst))
+    # 更新 deleted.jsonl
+    p.write_text("\n".join(remaining) + ("\n" if remaining else ""), encoding="utf-8")
+    log.info("[restore] 恢复样本 %s", subject_id)
+    return True, subject_id
 
 
 def _scan_pdfs() -> list:
@@ -357,6 +453,9 @@ class Handler(BaseHTTPRequestHandler):
         elif p == "/api/backups":
             self._send(200, json.dumps({"backups": _list_backups()}, ensure_ascii=False),
                        "application/json; charset=utf-8")
+        elif p == "/api/trash":
+            self._send(200, json.dumps({"trash": _trash_list()}, ensure_ascii=False),
+                       "application/json; charset=utf-8")
         elif p == "/api/img":
             si = int(qs.get("sample", ["0"])[0])
             pg = int(qs.get("page", ["1"])[0])
@@ -380,6 +479,18 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, json.dumps({"ok": True, "name": name}))
             except Exception as e:
                 self._send(200, json.dumps({"ok": False, "err": str(e)[:200]}))
+            return
+        if u.path == "/api/delete_sample":
+            length = int(self.headers.get("Content-Length", 0))
+            data = json.loads(self.rfile.read(length) or "{}")
+            ok, info = _delete_sample(int(data.get("idx", -1)))
+            self._send(200, json.dumps({"ok": ok, "info": info}))
+            return
+        if u.path == "/api/restore_sample":
+            length = int(self.headers.get("Content-Length", 0))
+            data = json.loads(self.rfile.read(length) or "{}")
+            ok, info = _restore_sample(str(data.get("subject_id", "")))
+            self._send(200, json.dumps({"ok": ok, "info": info}))
             return
         if u.path == "/api/reset_submit":
             _save_submit_state({})

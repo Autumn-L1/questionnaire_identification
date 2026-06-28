@@ -84,6 +84,9 @@
   <button id="backupBtn" onclick="doBackup()" style="background:#357;border-color:#246">💾 备份</button>
   <select id="backupList" onchange="loadBackupList()" style="max-width:160px"></select>
   <button onclick="doRestore()" style="background:#a53;border-color:#942">↩ 恢复</button>
+  <button onclick="doDelete()" style="background:#c33;border-color:#a22">🗑 删除样本</button>
+  <select id="trashList" style="max-width:140px"></select>
+  <button onclick="doRestoreSample()" style="background:#357;border-color:#246">♻ 恢复样本</button>
   <button id="resetPageBtn" onclick="toggleResetPage()" title="切换样本时是否回到第一页">↻切样本回首页:开</button>
   <button id="checkbtn" onclick="toggleCheck()" title="标记当前样本已核对/未核对">○ 标记已核对</button>
   <button id="logbtn" onclick="toggleLog()">📋 日志</button>
@@ -235,7 +238,9 @@ function render() {
   // 选项条点击 → 设置数值(双维度则改对应维度)
   right.querySelectorAll('.opts span').forEach(sp => {
     sp.onclick = () => {
-      const cell = sp.closest('.cell'), inp = cell.querySelector('input[data-col]');
+      const cell = sp.closest('.cell');
+      // 双维度：从当前 dimrow 找对应 input（否则总取第一个=父亲）
+      const inp = sp.closest('.dimrow')?.querySelector('input[data-col]') || cell.querySelector('input[data-col]');
       const cur = String(inp.value).trim();
       if (inp.dataset.dim) {
         inp.value = sp.dataset.v === cur ? '' : sp.dataset.v;
@@ -379,7 +384,31 @@ async function doRestore() {
   if (r.ok) { changes = {}; await reload(); loadBackupList(); document.getElementById('status').textContent = '已恢复 ' + name; }
   else { alert('恢复失败'); }
 }
+// 删除/恢复样本（回收站）
+async function loadTrashList() {
+  const r = await (await fetch('/api/trash')).json();
+  const sel = document.getElementById('trashList');
+  sel.innerHTML = (r.trash && r.trash.length)
+    ? r.trash.map(t => `<option value="${t.subject_id}">${t.subject_id} ${t.name}</option>`).join('')
+    : '<option value="">(回收站空)</option>';
+}
+async function doDelete() {
+  if (!confirm(`删除当前样本 ${curSample+1}？PDF/过程文件/CSV行将移到回收站`)) return;
+  const r = await (await fetch('/api/delete_sample', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ idx: curSample }) })).json();
+  if (r.ok) { changes = {}; await reload(); loadTrashList(); document.getElementById('status').textContent = '已删除 ' + r.info; }
+  else { alert('删除失败: ' + r.info); }
+}
+async function doRestoreSample() {
+  const sid = document.getElementById('trashList').value;
+  if (!sid) { alert('回收站空'); return; }
+  const r = await (await fetch('/api/restore_sample', { method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ subject_id: sid }) })).json();
+  if (r.ok) { await reload(); loadTrashList(); document.getElementById('status').textContent = '已恢复 ' + r.info; }
+  else { alert('恢复失败: ' + r.info); }
+}
 loadBackupList();
+loadTrashList();
 load();
 </script>
 </body>

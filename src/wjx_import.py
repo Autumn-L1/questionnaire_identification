@@ -218,6 +218,13 @@ def fill_one(page, row: dict, mp: dict, recorder: str) -> tuple[list, list]:
     set_text(mp["other_q"], row.get("wjx_other", ""))
     # 填空题（支持 str 或 {col, clean, null_fill} 三种格式）
     for qn, spec in mp.get("text", {}).items():
+        if isinstance(spec, dict) and spec.get("template"):
+            # 模板字符串：替换 {列名} 占位（如 "初一-10-{name}"）
+            val = spec["template"]
+            for k, v in row.items():
+                val = val.replace("{" + k + "}", str(v or ""))
+            set_text(qn, val)
+            continue
         if isinstance(spec, dict):
             col, val = spec["col"], row.get(spec["col"], "")
             if spec.get("clean") == "digit":
