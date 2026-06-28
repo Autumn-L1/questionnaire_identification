@@ -39,6 +39,7 @@
   <label>录入人缩写：<input type="text" id="recorder" value="default"></label>
   <label><input type="checkbox" id="autoTag"> 录入人后加"(自动化)"</label>
   <label><input type="checkbox" id="submit" checked> 自动提交</label>
+  <label>提交间隔(秒)：<input type="number" id="interval" value="3" min="0" max="60" style="width:50px"></label>
   <label><input type="checkbox" id="headless"> 无头模式(不弹窗，遇验证码会失败)</label>
   <div class="hint">推荐：勾选自动提交 + 不勾无头模式（弹窗，遇验证码人工过）</div>
 </div>
@@ -117,7 +118,7 @@ async function start() {
   document.getElementById('startBtn').disabled = true;
   document.getElementById('statusText').textContent = '启动中…';
   const r = await (await fetch('/api/wjx_import', { method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ samples: idxs, recorder, submit, headless }) })).json();
+    body: JSON.stringify({ samples: idxs, recorder, submit, headless, interval: parseInt(document.getElementById('interval').value)||0 }) })).json();
   if (!r.ok) { alert(r.err || '启动失败'); document.getElementById('startBtn').disabled = false; return; }
   poll();
 }

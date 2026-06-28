@@ -313,7 +313,8 @@ def _write_wjx_status(st: dict) -> None:
         pass
 
 
-def _wjx_run(samples: list[int], recorder: str, submit: bool, headless: bool):
+def _wjx_run(samples: list[int], recorder: str, submit: bool, headless: bool,
+             interval: int = 3):
     """后台线程：逐样本打开问卷星填写(+提交)。写进度到 WJX_STATUS。"""
     import csv
     from . import wjx_import
@@ -386,6 +387,9 @@ def _wjx_run(samples: list[int], recorder: str, submit: bool, headless: bool):
                                       "error": str(e)[:200]})
             st["done"] += 1
             _write_wjx_status(st)
+            if interval > 0 and st["done"] < st["total"] and not WJX_STOP_EVENT.is_set():
+                log.info("[wjx] 等待 %ds 后继续下一样本", interval)
+                time.sleep(interval)
         if headless:
             b.close()
             p.stop()
@@ -564,9 +568,10 @@ class Handler(BaseHTTPRequestHandler):
             recorder = data.get("recorder", "default") or "default"
             submit = bool(data.get("submit", False))
             headless = bool(data.get("headless", False))
+            interval = int(data.get("interval", 3))
             # 清空上次 status（防 poll 读到旧 results）
             _write_wjx_status({"running": False, "total": 0, "done": 0, "current": None, "results": []})
-            t = threading.Thread(target=_wjx_run, args=(samples, recorder, submit, headless), daemon=True)
+            t = threading.Thread(target=_wjx_run, args=(samples, recorder, submit, headless, interval), daemon=True)
             t.start()
             self._send(200, json.dumps({"ok": True, "started": True, "total": len(samples)}),
                        "application/json; charset=utf-8")
