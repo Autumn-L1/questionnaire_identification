@@ -44,6 +44,7 @@ TRASH_DIR = ROOT / "trash"   # 删除样本回收站
 PORT = 8000
 log = logging.getLogger("qr.review")
 CAPTCHA_EVENT = threading.Event()   # 无头遇验证码→有头人工干预完成信号
+WJX_STOP_EVENT = threading.Event()  # 停止导入任务信号
 
 
 def _do_backup() -> str:
@@ -322,9 +323,13 @@ def _wjx_run(samples: list[int], recorder: str, submit: bool, headless: bool):
     rows = list(csv.DictReader(open(RESULTS, encoding="utf-8-sig")))
     mp = wjx_import.load_mapping()
     url = mp["wjx_url"]
+    WJX_STOP_EVENT.clear()
     try:
         p, b, pg = wjx_import.open_wjx(url, headless=headless)
         for idx in samples:
+            if WJX_STOP_EVENT.is_set():
+                log.info("[wjx] 用户停止导入，已完成 %d/%d", st["done"], st["total"])
+                break
             if idx >= len(rows):
                 continue
             row = rows[idx]
@@ -506,6 +511,10 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length) or "{}")
             ok, info = _restore_sample(str(data.get("subject_id", "")))
             self._send(200, json.dumps({"ok": ok, "info": info}))
+            return
+        if u.path == "/api/wjx_stop":
+            WJX_STOP_EVENT.set()
+            self._send(200, json.dumps({"ok": True}))
             return
         if u.path == "/api/reset_submit":
             _save_submit_state({})

@@ -51,6 +51,7 @@
 </div>
 <div class="card">
   <button id="startBtn" onclick="start()">🚀 开始导入</button>
+  <button id="stopBtn" onclick="doStop()" style="display:none;background:#c33;border-color:#a22">⏹ 停止</button>
   <span id="statusText" class="hint"></span>
   <div class="bar"><div id="barFill" style="width:0"></div></div>
   <div id="progress"></div>
@@ -145,8 +146,8 @@ async function poll() {
     const subTxt = r.error ? '✗'+r.error : (subMap[r.submit] || r.submit || '—');
     return `<div class="res ${cls}">样本 ${r.subject_id||r.idx}: 填${r.filled??'?'}项 → 提交${subTxt}</div>`;
   }).join('');
-  if (s.running) { pollTimer = setTimeout(poll, 1500); }
-  else { document.getElementById('startBtn').disabled = false; clearTimeout(pollTimer); load(); }
+  if (s.running) { pollTimer = setTimeout(poll, 1500); document.getElementById('stopBtn').style.display = 'inline-block'; }
+  else { document.getElementById('startBtn').disabled = false; document.getElementById('stopBtn').style.display = 'none'; clearTimeout(pollTimer); load(); }
   // 无头遇验证码：弹有头窗口，提示人工处理（cw 已在上方声明）
   const box = document.getElementById('captchaBox');
   if (cw && box.style.display === 'none') {
@@ -162,7 +163,21 @@ async function captchaDone() {
   document.getElementById('captchaBox').style.display = 'none';
   document.getElementById('statusText').textContent = '人工完成，继续…';
 }
-loadUrl(); load();
+async function doStop() {
+  if (!confirm('确定停止导入？已完成的样本不受影响')) return;
+  await fetch('/api/wjx_stop', { method: 'POST' });
+  document.getElementById('statusText').textContent = '正在停止…';
+}
+// 页面加载时检查是否有进行中的任务（刷新保持进度）
+async function checkRunning() {
+  const s = await (await fetch('/api/wjx_status')).json();
+  if (s.running) {
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    poll();
+  }
+}
+loadUrl(); load(); checkRunning();
 </script>
 </body>
 </html>
