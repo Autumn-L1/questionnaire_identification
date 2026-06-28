@@ -2,8 +2,8 @@ wjx_url: https://v.wjx.cn/vm/QL0D1Ad.aspx
 recorder_q: q1
 other_q: q65
 text:
-  q2: p2_q1
-  q3: {template: "初一-10-{name}"}   # 请选择信息框：初一-10-姓名
+  q2: {template: "初一-10-{name}"}   # 请选择您的信息(多级下拉 q2): 初一-10-姓名
+  q3: name             # 1.你的姓名
   q6:
     col: p2_q4
     clean: digit
