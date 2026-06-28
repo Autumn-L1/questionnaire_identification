@@ -89,10 +89,11 @@ def _delete_sample(idx: int):
     if not (0 <= idx < len(rows)):
         return False, "索引无效"
     row = rows[idx]
-    sid = row.get("subject_id", str(idx))
+    row_dict = dict(zip(cols, row))  # list → dict
+    sid = row_dict.get("subject_id", str(idx))
     # 存删除行（供恢复）
     with open(TRASH_DIR / "deleted_rows.jsonl", "a", encoding="utf-8") as f:
-        f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        f.write(json.dumps(row_dict, ensure_ascii=False) + "\n")
     # 移 work 目录
     dirs = _sample_dirs()
     if idx < len(dirs) and dirs[idx].exists():
@@ -155,7 +156,7 @@ def _restore_sample(subject_id: str):
         return False, "回收站无此样本"
     # 行加回 results.csv
     cols, rows = _read_results()
-    rows.append(restored)
+    rows.append([restored.get(c, "") for c in cols])
     with open(RESULTS, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
         w.writerow(cols)
